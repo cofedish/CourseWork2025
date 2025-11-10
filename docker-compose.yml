@@ -1,0 +1,90 @@
+version: '3.8'
+
+services:
+  # Контейнер victim - имитирует жертву атаки
+  victim:
+    build:
+      context: ./victim
+      dockerfile: Dockerfile
+    container_name: sidechannel_victim
+
+    # Общий volume для логов
+    volumes:
+      - ./logs:/logs
+
+    # Ограничения ресурсов (опционально)
+    # Это позволяет контролировать нагрузку и делать эффект более наблюдаемым
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 512M
+        reservations:
+          cpus: '0.5'
+          memory: 256M
+
+    # Привязка к определённому CPU ядру (требует Docker 20.10+)
+
+    networks:
+      - sidechannel_net
+
+    # Политика перезапуска
+    restart: "no"
+
+    # Логирование
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # Контейнер attacker - выполняет Prime+Probe измерения
+  attacker:
+    build:
+      context: ./attacker
+      dockerfile: Dockerfile
+    container_name: sidechannel_attacker
+
+    # Общий volume для логов
+    volumes:
+      - ./logs:/logs
+
+    # Ограничения ресурсов
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 512M
+        reservations:
+          cpus: '0.5'
+          memory: 256M
+
+    # Привязка к тому же CPU ядру для максимального эффекта
+
+    networks:
+      - sidechannel_net
+
+    # Зависимость: attacker запускается после victim
+    depends_on:
+      - victim
+
+    # Политика перезапуска
+    restart: "no"
+
+    # Логирование
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+networks:
+  sidechannel_net:
+    driver: bridge
+    # Сетевая изоляция: контейнеры в одной сети, но не взаимодействуют напрямую
+
+volumes:
+  logs:
+
+
+
