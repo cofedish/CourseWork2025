@@ -1,5 +1,3 @@
-# Side-Channel Attack Demo: Docker Container Cache Analysis
-
 [![Docker](https://img.shields.io/badge/Docker-Ready-blue.svg)](https://www.docker.com/)
 [![Python](https://img.shields.io/badge/Python-3.11%2B-green.svg)](https://www.python.org/)
 [![License](https://img.shields.io/badge/License-Educational-yellow.svg)](#license)
